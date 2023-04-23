@@ -1,0 +1,6 @@
+__pycache__/*
+*.json
+nb_models/*
+*.zip
+*.pth
+acc_predictor/*

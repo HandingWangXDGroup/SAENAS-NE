@@ -207,10 +207,6 @@ class ENAS(object):
             if ind.code is None:
                 ind.code = self.encode_g2v(ind.X)
         scores = self.predict(mixed)
-        # trues=[100-Nasbench301.get_cell(ind.X).get_val_loss(nasbench=self.nasspace.nasbench) for ind in mixed]
-        # logging.info("the trues is ready.")
-        # kd = kendalltau(scores,trues)[0]
-        # logging.info("kd:{}".format(kd))
         for i in range(len(mixed)):
             mixed[i].score = scores[i]
         diss = np.full((self.pop_size,self.pop_size*self.M),np.inf)
@@ -296,10 +292,6 @@ class ENAS(object):
             self.best_F = self.archive[0].F
             self.best_FS.extend([self.best_F]*k)
             logging.info("gen:{} n_eval:{} best_F:{}".format(self.n_gen,self.n_eval,self.best_F))
-
-            # ## 添加不确定性
-            # diversity = self.pop_diversity(self.archive)
-            # self.diversitys.append(diversity)
         
         self.n_gen+=1
     

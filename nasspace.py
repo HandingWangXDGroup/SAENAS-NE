@@ -3,21 +3,13 @@ import copy
 import numpy as np
 import pickle
 
-from nasbench_301.cell_301 import Cell301
+from nascell.cell_301 import Cell301
+from nascell.cell_201 import Cell201
+from nas_201_api import NASBench201API as nb201
 import nasbench301.api as nb301
+from operations import OPERATIONS_201
 
-OPS = ['max_pool_3x3',
-       'avg_pool_3x3',
-       'skip_connect',
-       'sep_conv_3x3',
-       'sep_conv_5x5',
-       'dil_conv_3x3',
-       'dil_conv_5x5'
-       ]
-NUM_VERTICES = 4
-INPUT_1 = 'c_k-2'
-INPUT_2 = 'c_k-1'
-OUTPUT = 'c_k'
+default_data_folder = '/data/Fanliang/data/'
 
 class Nasbench:
 
@@ -284,9 +276,107 @@ class Nasbench:
                 matrix[i][j] = cls.get_cell(arch_1).distance(cls.get_cell(arch_2), dist_type=distance)
         return matrix
 
+
+class Nasbench201(Nasbench):
+
+    def __init__(self,
+                 dataset='cifar10',
+                 data_folder=default_data_folder,
+                 version='1_0'):
+        self.search_space = 'nasbench_201'
+        self.dataset = dataset
+        self.index_hash = None
+        
+        if version == '1_0':
+            self.nasbench = nb201(os.path.expanduser(data_folder + 'NAS-Bench-201-v1_0-e61699.pth'),verbose=False)
+        elif version == '1_1':
+            self.nasbench = nb201(os.path.expanduser(data_folder + 'NAS-Bench-201-v1_1-096897.pth'),verbose=False)
+        
+    def query_index_by_ops(self,ops):
+        return self.nasbench.query_index_by_arch(Cell201.get_string_from_ops(ops))
+
+    def get_type(self):
+        return 'nasbench_201'
+
+    @classmethod
+    def get_cell(cls, arch=None):
+        if not arch:
+            return Cell201
+        else:
+            return Cell201(**arch)
+
+    def get_nbhd(self, arch, mutate_encoding='adj'):
+        return Cell201(**arch).get_neighborhood(self.nasbench, 
+                                                mutate_encoding=mutate_encoding)
+
+    def get_hash(self, arch):
+        # return a unique hash of the architecture+fidelity
+        return Cell201(**arch).get_string()
+    
+    def crossover(self,X1,X2,p_c):
+        #2、one-point crossover
+        # ops1 = copy.deepcopy(self.get_cell(X1).get_op_list())
+        # ops2 = copy.deepcopy(self.get_cell(X2).get_op_list())
+        # len_code = len(ops1)
+        # point = np.random.randint(1,len_code)
+        # ops1[point:],ops2[point:]  = ops2[point:],ops1[point:]
+        # o1 = self.get_cell().get_string_from_ops(ops1)
+        # o2 = self.get_cell().get_string_from_ops(ops2)
+        # return {"string":o1},{"string":o2}
+
+        #1、uniform crossover
+        ops1 = copy.deepcopy(self.get_cell(X1).get_op_list())
+        ops2 = copy.deepcopy(self.get_cell(X2).get_op_list())
+        len_code = len(ops1)
+        crossover_points = np.random.uniform(0,1,len_code)<p_c
+        for point in range(len_code):
+            if crossover_points[point]:
+                ops1[point],ops2[point] = ops2[point],ops1[point]
+        o1 = self.get_cell().get_string_from_ops(ops1)
+        o2 = self.get_cell().get_string_from_ops(ops2)
+        return {"string":o1},{"string":o2}
+    
+    def mutate(self,X,p_m):
+        ops = copy.deepcopy(self.get_cell(X).get_op_list())
+        len_ops = len(ops)
+        ##  1、uniform
+        mutate_points = np.random.uniform(0.,1.,len_ops)<p_m
+        for point in range(len_ops):
+            if mutate_points[point]:
+                available = [o for o in OPERATIONS_201 if o != ops[point]]
+                ops[point] = np.random.choice(available)
+
+        # 2、single
+        # id_op = random.randint(0,len_ops-1)
+        # available = [o for o in OPS if o!=ops[id_op]]
+        # ops[id_op] = random.choice(available)
+        
+        # 3、uniform muate_rate = 1/len
+        # mutate_points = np.random.uniform(0.,1.,len_ops)<1/len_ops
+        # for point in range(len_ops):
+        #     if mutate_points[point]:
+        #         available = [o for o in OPS if o != ops[point]]
+        #         ops[point] = np.random.choice(available)
+        
+        o1 = self.get_cell().get_string_from_ops(ops) 
+        return {"string":o1}
+
 class Nasbench301(Nasbench):
 
     def __init__(self):
+        self.OPS = ['max_pool_3x3',
+       'avg_pool_3x3',
+       'skip_connect',
+       'sep_conv_3x3',
+       'sep_conv_5x5',
+       'dil_conv_3x3',
+       'dil_conv_5x5'
+            ]
+        self.NUM_VERTICES = 4
+        self.INPUT_1 = 'c_k-2'
+        self.INPUT_2 = 'c_k-1'
+        self.OUTPUT = 'c_k'
+
         self.dataset = 'cifar10'
         self.search_space = 'nasbench_301'
         ensemble_dir_performance = os.path.expanduser('nb_models/xgb_v1.0')
@@ -353,7 +443,7 @@ class Nasbench301(Nasbench):
             node = i//2
             op = i%2
             if op==1:
-                x[node][op] = np.random.choice(len(OPS))
+                x[node][op] = np.random.choice(len(self.OPS))
             else:
                 inputs = node//2 if node <8 else node//2-4
                 op_in = np.random.choice(2+inputs)

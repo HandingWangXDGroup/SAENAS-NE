@@ -19,6 +19,26 @@ def apply_drop_path(x, drop_path_keep_prob, layer_id, layers, step, steps):
     return x
 
 
+class Zeroize(nn.Module):
+    def __init__(self,C_in,C_out,stride):
+        super(Zeroize,self).__init__()
+        self.C_in = C_in
+        self.C_out = C_out
+        self.stride = stride
+        self.is_zero= True
+    
+    def forward(self,x):
+        if self.C_in == self.C_out:
+            if self.stride == 1:
+                return x.mul(0.)
+            else:
+                return x[:,:,::self.stride,::self.stride].mul(0.)
+        else:
+            shape = list(x.shape)
+            shape[1] = self.C_out
+            zeros = x.new_zeros(shape,dtype=x.dtype,device=x.device)
+            return zeros
+
 class AuxHeadCIFAR(nn.Module):
     def __init__(self, C_in, classes):
         """assuming input size 8x8"""
@@ -336,12 +356,20 @@ class FinalCombine(nn.Module):
         out = torch.cat([states[i] for i in self.concat], dim=1)
         return out
 
-OPERATIONS = {
-    0: nn.MaxPool2d,    #'max_pool_3x3'
-    1: nn.AvgPool2d,    #'avg_pool_3x3'
-    2: Identity,        #'skip_connect'
-    3: SepConv,         #'sep_conv_3x3'
-    4: SepConv,         #'sep_conv_5x5'
-    5: DilConv,         #'dil_conv_3x3'
-    6: DilConv,         #'dil_conv_5x5'
+OPERATIONS_201 = {
+    'none': lambda C_in,C_out,stride,affine : Zeroize(C_in,C_out,stride,affine),
+    'skip_connect': lambda C_in,C_out,stride,affine: Identity() if stride==1 else FactorizedReduce(C_in,C_out,stride,affine),
+    'nor_conv_1x1': lambda C_in,C_out,stride,affine: ReLUConvBN(C_in,C_out,1,stride,0,affine),
+    'nor_conv_3x3': lambda C_in,C_out,stride,affine: ReLUConvBN(C_in,C_out,3,stride,1,affine),
+    'avg_pool_3x3': lambda C_in,C_out,stride,affine: nn.AvgPool2d(3,stride,1)
+}
+
+OPERATIONS_301 = {
+    "max_pool_3x3": nn.MaxPool2d,    #'max_pool_3x3'
+    "avg_pool_3x3": nn.AvgPool2d,    #'avg_pool_3x3'
+    "skip_connect": Identity,        #'skip_connect'
+    "sep_conv_3x3": SepConv,         #'sep_conv_3x3'
+    "sep_conv_5x5": SepConv,         #'sep_conv_5x5'
+    "dil_conv_3x3": DilConv,         #'dil_conv_3x3'
+    "dil_conv_5x5": DilConv,         #'dil_conv_5x5'
 }

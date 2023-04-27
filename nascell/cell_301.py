@@ -4,14 +4,9 @@ import random
 from collections import namedtuple
 from encoder.graph2vec import featrue_extract_by_graph
 
-OPS = ['max_pool_3x3',
-       'avg_pool_3x3',
-       'skip_connect',
-       'sep_conv_3x3',
-       'sep_conv_5x5',
-       'dil_conv_3x3',
-       'dil_conv_5x5'
-       ]
+from operations import OPERATIONS_301 as OPS
+
+OPS = list(OPS.keys())
 NUM_VERTICES = 4
 INPUT_1 = 'c_k-2'
 INPUT_2 = 'c_k-1'

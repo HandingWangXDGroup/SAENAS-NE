@@ -1,14 +1,17 @@
 import json
+import os
+import sys
+root_path = os.getcwd()
+sys.path.append(root_path)
 import time
 import argparse
 import numpy as np
 from numpy.matrixlib.defmatrix import matrix
 import pandas as pd
 from numpy.core.fromnumeric import argsort
-from nasspace import Nasbench301,Nasbench201
 from encoder.graph2vec import graph2vec
 from operations import OPERATIONS_201
-
+from nasspace import Nasbench301,Nasbench201
 
 
 
@@ -16,7 +19,6 @@ from operations import OPERATIONS_201
 def load_graph_201():
     INPUT = 'input'
     OUTPUT = 'output'
-
     OPS = list(OPERATIONS_201.keys())
     OPS_INCLUSIVE = [INPUT, OUTPUT, *OPS]
     searchspace = Nasbench201()
@@ -78,7 +80,7 @@ def load_graph_301():
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Run Graph2Vec.")
-    parser.add_argument("--nasbench",choices=["101","201","301"],default="101")
+    parser.add_argument("--nasbench",choices=["101","201","301"],default="201")
     parser.add_argument("--input-path",
                         nargs="?",
                         default="./data/graphs_json_same",

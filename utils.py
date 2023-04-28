@@ -671,7 +671,7 @@ def to_oneshot(array,len_feature=16):
 
 def merge_params(args,yaml_file="config/nasbench.yaml"):
     params = yaml.load(open(yaml_file,'r'),Loader=yaml.FullLoader)
-    for key, val in params[args.nasbench]:
+    for key, val in params["nasbench-"+args.nasbench].items():
         setattr(args,key,val)
     return args
 

@@ -1,6 +1,5 @@
 
 import json
-
 import os
 import logging
 import argparse
@@ -60,8 +59,9 @@ args = parser.parse_args()
 
 args = merge_params(args)
 
+print(args)
 # graph2vec
-g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"doc2vec_model_dim32.model")
+g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim32.model")
 
 for seed in range(1):
     logging.info("seed:{}".format(seed))

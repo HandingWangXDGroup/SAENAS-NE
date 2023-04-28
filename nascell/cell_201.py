@@ -24,15 +24,15 @@ LONGEST_PATH_LENGTH = 3
 
 class Cell201:
 
-    def __init__(self, string):
-        self.string = string
+    def __init__(self, arch):
+        self.arch = arch
 
     def get_string(self):
-        return self.string
+        return self.arch
 
     def serialize(self):
         return {
-            'string':self.string
+            'arch':self.arch
         }
 
     @classmethod
@@ -50,7 +50,7 @@ class Cell201:
         for i in range(OP_SPOTS):
             op = random.choice(OPS)
             ops.append(op)
-        return {'string':cls.get_string_from_ops(ops)}
+        return {'arch':cls.get_string_from_ops(ops)}
 
     def encode(self, predictor_encoding, nasbench=None,encoder=None, deterministic=True, cutoff=None):
 
@@ -118,7 +118,7 @@ class Cell201:
 
         return dic
     
-    def encode_g2v(self):
+    def encode_g2v(self,nasspace,g2v_model):
         matrix = np.array([[0, 1, 1, 0, 1, 0, 0, 0],
             [0, 0, 0, 1, 0, 1, 0, 0],
             [0, 0, 0, 0, 0, 0, 1, 0],
@@ -129,7 +129,7 @@ class Cell201:
             [0, 0, 0, 0, 0, 0, 0, 0]])
         edges = []
         features = {}
-        hash_info = self.string
+        hash_info = self.arch
         ops = ["input"]+self.get_op_list()+["output"]
         if 'none' in ops:
             index = ops.index('none')
@@ -146,14 +146,14 @@ class Cell201:
         g = {"edges":edges,"features":features}
 
         doc = featrue_extract_by_graph(g,name=hash_info)[0]
-        arch_code = self.g2v_model.infer_vector(doc)
+        arch_code = g2v_model.infer_vector(doc)
         return arch_code
 
     def get_runtime(self, nasbench,index, dataset='cifar10'):
         return nasbench.query_by_index(index, dataset).get_eval('x-valid')['time']
 
     def get_val_loss(self, nasbench, deterministic=1, dataset='cifar10'):
-        index = nasbench.query_index_by_arch(self.string)
+        index = nasbench.query_index_by_arch(self.arch)
         if dataset == 'cifar10':
             results = nasbench.query_by_index(index, 'cifar10-valid',hp="200")
         else:
@@ -169,7 +169,7 @@ class Cell201:
             return round(100-np.random.choice(accs), 10)
 
     def get_test_loss(self, nasbench, dataset='cifar10', deterministic=1):
-        index = nasbench.query_index_by_arch(self.string)
+        index = nasbench.query_index_by_arch(self.arch)
         results = nasbench.query_by_index(index, dataset,hp="200")
 
         accs = []
@@ -184,7 +184,7 @@ class Cell201:
     def get_op_list(self):
         # given a string, get the list of operations
 
-        tokens = self.string.split('|')
+        tokens = self.arch.split('|')
         ops = [t.split('~')[0] for i,t in enumerate(tokens) if i not in [0,2,5,9]]
         return ops
 
@@ -225,7 +225,7 @@ class Cell201:
                 new_ops.append(np.random.choice(available))
             else:
                 new_ops.append(op)
-        return {'string':self.get_string_from_ops(new_ops)}
+        return {'arch':self.get_string_from_ops(new_ops)}
 
     def mutate(self, 
                nasbench, 
@@ -248,7 +248,7 @@ class Cell201:
                 else:
                     new_ops.append(op)
 
-            return {'string':self.get_string_from_ops(new_ops)}
+            return {'arch':self.get_string_from_ops(new_ops)}
         
         elif mutate_encoding in ['path', 'trunc_path']:
             path_blueprints = [[3], [0,4], [1,5], [0,2,5]]
@@ -266,8 +266,8 @@ class Cell201:
                 available = [o for o in OPS if o != ops[idx]]
                 new_ops[idx] = np.random.choice(available)
 
-            new_arch = {'string':self.get_string_from_ops(new_ops)}
-            return {'string':self.get_string_from_ops(new_ops)}
+            new_arch = {'arch':self.get_string_from_ops(new_ops)}
+            return {'arch':self.get_string_from_ops(new_ops)}
         else:
             print('{} is an invalid mutate encoding'.format(mutate_encoding))
             raise NotImplementedError()
@@ -378,7 +378,7 @@ class Cell201:
                 for op in available:
                     new_ops = ops.copy()
                     new_ops[i] = op
-                    new_arch = {'string':self.get_string_from_ops(new_ops)}
+                    new_arch = {'arch':self.get_string_from_ops(new_ops)}
                     nbhd.append(new_arch)
 
         elif mutate_encoding in ['path', 'trunc_path']:
@@ -402,7 +402,7 @@ class Cell201:
                             if ops[j] != new_ops[j]:
                                 same = False
                         if not same:
-                            new_arch = {'string':self.get_string_from_ops(new_ops)}
+                            new_arch = {'arch':self.get_string_from_ops(new_ops)}
                             nbhd.append(new_arch)
         else:
             print('{} is an invalid mutate encoding'.format(mutate_encoding))

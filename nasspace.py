@@ -5,8 +5,9 @@ import pickle
 
 from nascell.cell_301 import Cell301
 from nascell.cell_201 import Cell201
+
 from nas_201_api import NASBench201API as nb201
-import nasbench301.api as nb301
+# import nasbench301.api as nb301
 from operations import OPERATIONS_201
 
 default_data_folder = '/data/Fanliang/data/'
@@ -302,8 +303,10 @@ class Nasbench201(Nasbench):
     def get_cell(cls, arch=None):
         if not arch:
             return Cell201
-        else:
+        elif isinstance(arch,dict):
             return Cell201(**arch)
+        else:
+            return Cell201(arch)
 
     def get_nbhd(self, arch, mutate_encoding='adj'):
         return Cell201(**arch).get_neighborhood(self.nasbench, 
@@ -334,7 +337,7 @@ class Nasbench201(Nasbench):
                 ops1[point],ops2[point] = ops2[point],ops1[point]
         o1 = self.get_cell().get_string_from_ops(ops1)
         o2 = self.get_cell().get_string_from_ops(ops2)
-        return {"string":o1},{"string":o2}
+        return o1,o2
     
     def mutate(self,X,p_m):
         ops = copy.deepcopy(self.get_cell(X).get_op_list())
@@ -359,7 +362,7 @@ class Nasbench201(Nasbench):
         #         ops[point] = np.random.choice(available)
         
         o1 = self.get_cell().get_string_from_ops(ops) 
-        return {"string":o1}
+        return o1
 
 class Nasbench301(Nasbench):
 

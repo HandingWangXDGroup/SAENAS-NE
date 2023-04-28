@@ -1,6 +1,7 @@
 
 import copy
 from nondo_sort import NonDominatedSorting
+
 import numpy as np
 from population import Population
 from ranknet import RankNet
@@ -12,9 +13,9 @@ from nasspace import  Nasbench301,Nasbench201
 
 import logging
 import random
-from operations import OPERATIONS
+from operations import OPERATIONS_201, OPERATIONS_301
 
-operations = list(OPERATIONS.keys())
+operations = list(OPERATIONS_201.keys())
 n_operations = len(operations)
 
 nasbenchs = {"201":Nasbench201,"301":Nasbench301}
@@ -111,14 +112,8 @@ class ENAS(object):
     
     def solve(self):
         self.initialize()
-        diversity = self.pop_diversity(self.pop)
-        self.diversitys.append(diversity)
-        logging.info("gen:{},diversity:{}".format(self.n_gen,diversity)) 
         while self.has_next():
             self.next()
-            diversity = self.pop_diversity(self.pop)
-            self.diversitys.append(diversity)
-            logging.info("gen:{},diversity:{}".format(self.n_gen,diversity)) 
             logging.info("gen:{},FS:{}".format(self.n_gen,[ind.F for ind in self.archive])) 
         return self.best_FS,self.diversitys
     

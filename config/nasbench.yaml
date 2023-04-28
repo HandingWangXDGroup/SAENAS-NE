@@ -1,4 +1,4 @@
-201:
+nasbench-201:
   channels: 16
   dataset: cifar10
   nodes: 5
@@ -6,3 +6,4 @@
   batch_size: 512
   n_samples: 200
   pop_size: 20
+  nas_bench_dir: /data/Fanliang/data/

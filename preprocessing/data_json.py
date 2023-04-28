@@ -50,7 +50,7 @@ def load_graph_201():
         for id in range(len(ops)):
             features[str(id)] = str(OPS_INCLUSIVE.index(ops[id]))
         g = {"edges":edges,"features":features}
-        with open("data/graphs_json/{}.json".format(uid),'w') as fp:
+        with open("data/graphs_json_201/{}.json".format(uid),'w') as fp:
             json.dump(g,fp)
         k+=1
         print("{}-th arch has been writen".format(k))
@@ -72,7 +72,7 @@ def load_graph_301():
         for id in range(len(ops)):
             features[str(id)] = str(ops[id])
         g = {"edges":edges,"features":features}
-        with open("data/graphs_json_same/{}.json".format(uid),'w') as fp:
+        with open("data/graphs_json_301/{}.json".format(uid),'w') as fp:
             json.dump(g,fp)
         k+=1
         print("{}-th arch has been writen".format(k))
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     parser.add_argument("--nasbench",choices=["101","201","301"],default="201")
     parser.add_argument("--input-path",
                         nargs="?",
-                        default="./data/graphs_json_same",
+                        default="./data/graphs_json",
                         help="Input folder with jsons.")
 
     parser.add_argument("--output-path",
@@ -128,6 +128,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.nasbench=="201":
         load_graph_201()
+        args.input_path = "data/graphs_json_201"
     elif args.nasbench=="301":
         load_graph_301()
+        args.input_path = "data/graphs_json_301"
     graph2vec(args)

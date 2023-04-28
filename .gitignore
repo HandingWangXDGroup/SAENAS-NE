@@ -4,3 +4,5 @@ nb_models/*
 *.zip
 *.pth
 acc_predictor/*
+data/*
+g2v_model/*

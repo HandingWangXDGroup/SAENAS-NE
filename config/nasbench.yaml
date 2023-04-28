@@ -1,0 +1,8 @@
+201:
+  channels: 16
+  dataset: cifar10
+  nodes: 5
+  epochs: 60
+  batch_size: 512
+  n_samples: 200
+  pop_size: 20

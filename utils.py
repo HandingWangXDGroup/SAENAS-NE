@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.utils.data as data
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
+import yaml
 
 B=5
 
@@ -667,4 +668,11 @@ def to_oneshot(array,len_feature=16):
     for i,j in enumerate(array):
         matrix[i,int(j)]=1
     return matrix
+
+def merge_params(args,yaml_file="config/nasbench.yaml"):
+    params = yaml.load(open(yaml_file,'r'),Loader=yaml.FullLoader)
+    for key, val in params[args.nasbench]:
+        setattr(args,key,val)
+    return args
+
 

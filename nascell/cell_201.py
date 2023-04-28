@@ -11,10 +11,13 @@ import torch
 from .distance import *
 from operations import OPERATIONS_201 as OPS
 
+from encoder.graph2vec import featrue_extract_by_graph
+
 
 INPUT = 'input'
 OUTPUT = 'output'
 OPS = list(OPS.keys())
+OPS_INCLUSIVE = [INPUT, OUTPUT, *OPS]
 NUM_OPS = len(OPS)
 OP_SPOTS = 6
 LONGEST_PATH_LENGTH = 3
@@ -114,6 +117,37 @@ class Cell201:
         }
 
         return dic
+    
+    def encode_g2v(self):
+        matrix = np.array([[0, 1, 1, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0]])
+        edges = []
+        features = {}
+        hash_info = self.string
+        ops = ["input"]+self.get_op_list()+["output"]
+        if 'none' in ops:
+            index = ops.index('none')
+            matrix[index,:] = 0
+            matrix[:,index] = 0
+
+        xs,ys = np.where(matrix==1)
+        xs = xs.tolist()
+        ys = ys.tolist()
+        for x,y in zip(xs,ys):
+            edges.append([x,y])
+        for id in range(len(ops)):
+            features[str(id)] = str(OPS_INCLUSIVE.index(ops[id]))
+        g = {"edges":edges,"features":features}
+
+        doc = featrue_extract_by_graph(g,name=hash_info)[0]
+        arch_code = self.g2v_model.infer_vector(doc)
+        return arch_code
 
     def get_runtime(self, nasbench,index, dataset='cifar10'):
         return nasbench.query_by_index(index, dataset).get_eval('x-valid')['time']

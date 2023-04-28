@@ -8,7 +8,7 @@ from ranknet import RankNet
 from utils import  build_train_sample
 from individual import Individual
 
-from nasspace import  Nasbench301
+from nasspace import  Nasbench301,Nasbench201
 
 import logging
 import random
@@ -17,6 +17,8 @@ from operations import OPERATIONS
 operations = list(OPERATIONS.keys())
 n_operations = len(operations)
 
+nasbenchs = {"201":Nasbench201,"301":Nasbench301}
+
 def tournament_select(pop,n_sample=2):
     pop_size  = len(pop)
     idxs = random.sample(range(pop_size),k=n_sample)
@@ -24,14 +26,14 @@ def tournament_select(pop,n_sample=2):
     id  = idxs[np.argmax(scores_selected)]
     return pop[id]
 
-def crossover_ind(p1,p2,nasbench:Nasbench301,p_c=0.5):
+def crossover_ind(p1,p2,nasbench,p_c=0.5):
     r  = random.uniform(0,1)
     x1,x2 = nasbench.crossover(p1.X["arch"],p2.X["arch"],p_c)
     ind1 = Individual(X={"arch":x1},age=0)
     ind2 = Individual(X={"arch":x2},age=0)
     return ind1,ind2 
 
-def mutate_ind(p,nasbench:Nasbench301,p_m=0.05):
+def mutate_ind(p,nasbench,p_m=0.05):
     r = random.uniform(0,1)
     new_arch = nasbench.mutate(p.X["arch"],p_m)
     ind = Individual(X={"arch":new_arch},age=0)
@@ -71,20 +73,19 @@ class ENAS(object):
         self.ranknet=None
         self.gpr = None
 
-        self.parent_diversity = []
-        self.off_diversity = []
+        self.dataset = args.dataset
+        self.Nasbench = nasbenchs[args.nasbench]
         
-        self.diversitys = []
 
 
     def initialize(self):
         while len(self.archive)<self.pop_size:
-            arch = Nasbench301.get_cell().random_cell(self.nasspace.nasbench,random_encoding='adj')
+            arch = self.Nasbench.get_cell().random_cell(self.nasspace.nasbench,random_encoding='adj')
             hash_arch  = self.nasspace.get_hash(arch)
             if hash_arch in self.hash_visited:
                 continue
             else: self.hash_visited[hash_arch]=1
-            F = 100-Nasbench301.get_cell(arch).get_val_loss(self.nasspace.nasbench)
+            F = 100-self.Nasbench.get_cell(arch).get_val_loss(self.nasspace.nasbench)
             ind  = Individual(X=arch,age=0,F=F,score=F,code=self.encode_g2v(arch))
             self.archive.append(ind)
             if F>self.best_F:
@@ -105,7 +106,7 @@ class ENAS(object):
         return self.n_eval<self.total_eval
     
     def encode_g2v(self,arch):
-        return Nasbench301.get_cell(arch).encode_g2v(self.nasspace,self.g2v_model)
+        return self.Nasbench.get_cell(arch).encode_g2v(self.nasspace,self.g2v_model)
 
     
     def solve(self):
@@ -196,7 +197,7 @@ class ENAS(object):
         if len(offspring)<self.pop_size*self.M:
             logging.info("The number of offspring is insufficient, uniform sample ")
         while len(offspring)<self.pop_size*self.M:
-            arch = Nasbench301.get_cell().random_cell(self.nasspace.nasbench,random_encoding='adj')
+            arch = self.Nasbench.get_cell().random_cell(self.nasspace.nasbench,random_encoding='adj')
             hash_arch = self.nasspace.get_hash(arch)
             if hash_arch not in hash_visited:
                 offspring.append(Individual(X=arch,age=0))
@@ -254,7 +255,7 @@ class ENAS(object):
                 ind = self.pop[id]
             # for ind in self.pop:
                 if ind.F is None:
-                    ind.F = 100-Nasbench301.get_cell(ind.X).get_val_loss(nasbench=self.nasspace.nasbench)
+                    ind.F = 100-self.Nasbench.get_cell(ind.X).get_val_loss(nasbench=self.nasspace.nasbench)
                     self.archive.append(ind)
                     new_candidate.append(ind)
                     self.hash_visited[self.nasspace.get_hash(ind.X)]=1

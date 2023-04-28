@@ -7,7 +7,7 @@ from nascell.cell_301 import Cell301
 from nascell.cell_201 import Cell201
 
 from nas_201_api import NASBench201API as nb201
-# import nasbench301.api as nb301
+import nasbench301.api as nb301
 from operations import OPERATIONS_201
 
 default_data_folder = '/data/Fanliang/data/'

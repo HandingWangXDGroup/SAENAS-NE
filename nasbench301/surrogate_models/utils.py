@@ -7,17 +7,24 @@ from functools import partial
 from math import isclose
 
 import ConfigSpace as CS
+
 import ConfigSpace.hyperparameters as CSH
+
 import matplotlib.pyplot as plt
+
 import numpy as np
 import seaborn as sns
+
 from ConfigSpace.read_and_write import json as config_space_json_r_w
+
 from scipy.stats import norm, spearmanr, kendalltau
 from sklearn.metrics import mean_squared_error, r2_score
 from tqdm import tqdm
 
 from nasbench301.surrogate_models.bananas.bananas import BANANASModel
+
 from nasbench301.surrogate_models.gnn.gnn import GNNSurrogateModel
+
 from nasbench301.surrogate_models.gradient_boosting.lgboost import LGBModel, LGBModelTime
 from nasbench301.surrogate_models.gradient_boosting.xgboost import XGBModel, XGBModelTime
 from nasbench301.surrogate_models.random_forrest.sklearn_forest import SklearnForest

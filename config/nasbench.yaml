@@ -7,3 +7,10 @@ nasbench-201:
   n_samples: 200
   pop_size: 20
   nas_bench_dir: /data/Fanliang/data/
+
+nasbench-301:
+    channels: 32
+    nodes: 4
+    epochs: 150
+    batch_size: 256
+    pop_size: 30

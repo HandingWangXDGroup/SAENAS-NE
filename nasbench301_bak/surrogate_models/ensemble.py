@@ -5,6 +5,7 @@ import sys
 import numpy as np
 
 from abc import abstractmethod
+
 from nasbench301.surrogate_models import utils
 
 

@@ -58,6 +58,12 @@ print(args)
 g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim32.model")
 # g2v_model = Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model.model")
 
+logging.basicConfig(level=logging.INFO,
+                    filename='logs/nasbench-'+args.nasbench+'-'+args.dataset+'.log',
+                    filemode='w',
+                    format=
+                    '%(asctime)s - %(levelname)s: %(message)s')
+
 for seed in range(1):
     logging.info("seed:{}".format(seed))
     random.seed(seed)
@@ -71,10 +77,5 @@ for seed in range(1):
         nasspace = Nasbench201("cifar10",args.nas_bench_dir)
     elif args.nasbench == "301":
         nasspace = Nasbench301()
-    logging.basicConfig(level=logging.INFO,
-                    filename='logs/nasbench-'+args.nasbench+'.log',
-                    filemode='w',
-                    format=
-                    '%(asctime)s - %(levelname)s: %(message)s')
     enas = ENAS(nasspace=nasspace,g2v_model=g2v_model,args=args)
     best_FS = enas.solve()

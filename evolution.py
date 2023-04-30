@@ -66,6 +66,7 @@ class ENAS(object):
         self.n_gen = 0
         self.n_eval = 0
         self.best_F = 0.
+        self.best_FS = []
         self.best_X = None
         self.pop = []
         self.archive = []
@@ -91,7 +92,7 @@ class ENAS(object):
             if hash_arch in self.hash_visited:
                 continue
             else: self.hash_visited[hash_arch]=1
-            F = 100-self.Nasbench.get_cell(arch).get_val_loss(self.nasspace.nasbench)
+            F = 100-self.Nasbench.get_cell(arch).get_val_loss(self.nasspace.nasbench,dataset=self.dataset)
             ind  = Individual(X=arch,age=0,F=F,score=F,code=self.encode_g2v(arch))
             self.archive.append(ind)
             if F>self.best_F:
@@ -255,7 +256,7 @@ class ENAS(object):
                 ind = self.pop[id]
             # for ind in self.pop:
                 if ind.F is None:
-                    ind.F = 100-self.Nasbench.get_cell(ind.X).get_val_loss(nasbench=self.nasspace.nasbench)
+                    ind.F = 100-self.Nasbench.get_cell(ind.X).get_val_loss(nasbench=self.nasspace.nasbench,dataset=self.dataset)
                     self.archive.append(ind)
                     new_candidate.append(ind)
                     self.hash_visited[self.nasspace.get_hash(ind.X)]=1

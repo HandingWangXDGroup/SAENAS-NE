@@ -9,12 +9,12 @@ nasbench-101:
   total_eval: 150
   pop_size: 20
   p_c: 0.5
-  p_m: 0.1
+  p_m: 0.05
 
 
 nasbench-201:
   channels: 16
-  dataset: cifar10
+  dataset: ImageNet16-120
   nodes: 5
   epochs: 60
   batch_size: 512
@@ -22,6 +22,9 @@ nasbench-201:
   pop_size: 20
   nas_bench_dir: /data/Fanliang/data/
   total_eval: 100
+  p_c: 0.5
+  p_m: 0.05
+
 
 nasbench-301:
     channels: 32

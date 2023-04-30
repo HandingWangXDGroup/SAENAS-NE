@@ -356,20 +356,26 @@ class FinalCombine(nn.Module):
         out = torch.cat([states[i] for i in self.concat], dim=1)
         return out
 
-OPERATIONS_201 = {
-    'none': lambda C_in,C_out,stride,affine : Zeroize(C_in,C_out,stride,affine),
-    'skip_connect': lambda C_in,C_out,stride,affine: Identity() if stride==1 else FactorizedReduce(C_in,C_out,stride,affine),
-    'nor_conv_1x1': lambda C_in,C_out,stride,affine: ReLUConvBN(C_in,C_out,1,stride,0,affine),
-    'nor_conv_3x3': lambda C_in,C_out,stride,affine: ReLUConvBN(C_in,C_out,3,stride,1,affine),
-    'avg_pool_3x3': lambda C_in,C_out,stride,affine: nn.AvgPool2d(3,stride,1)
-}
+OPERATIONS_201 = [
+    'none',
+    'skip_connect',
+    'nor_conv_1x1',
+    'nor_conv_3x3',
+    'avg_pool_3x3',
+]
 
-OPERATIONS_301 = {
-    "max_pool_3x3": nn.MaxPool2d,    #'max_pool_3x3'
-    "avg_pool_3x3": nn.AvgPool2d,    #'avg_pool_3x3'
-    "skip_connect": Identity,        #'skip_connect'
-    "sep_conv_3x3": SepConv,         #'sep_conv_3x3'
-    "sep_conv_5x5": SepConv,         #'sep_conv_5x5'
-    "dil_conv_3x3": DilConv,         #'dil_conv_3x3'
-    "dil_conv_5x5": DilConv,         #'dil_conv_5x5'
-}
+OPERATIONS_301 = [
+    "max_pool_3x3",
+    "avg_pool_3x3",
+    "skip_connect",
+    "sep_conv_3x3",
+    "sep_conv_5x5",
+    "dil_conv_3x3",
+    "dil_conv_5x5",
+]
+
+OPERATIONS_101 = [
+    'conv3x3-bn-relu',
+    'conv1x1-bn-relu',
+    'maxpool3x3'
+]

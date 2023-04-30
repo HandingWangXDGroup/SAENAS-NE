@@ -2,13 +2,16 @@ import os
 import copy
 import numpy as np
 import pickle
+import random
 
 from nascell.cell_301 import Cell301
 from nascell.cell_201 import Cell201
+from nascell_101.cell_101 import Cell101
 
+from nasbench import api as nb101
 from nas_201_api import NASBench201API as nb201
 import nasbench301.api as nb301
-from operations import OPERATIONS_201
+from operations import OPERATIONS_201, OPERATIONS_101
 
 default_data_folder = '/data/Fanliang/data/'
 
@@ -276,6 +279,294 @@ class Nasbench:
             for j, arch_2 in enumerate(arches_2):
                 matrix[i][j] = cls.get_cell(arch_1).distance(cls.get_cell(arch_2), dist_type=distance)
         return matrix
+
+class Nasbench101(Nasbench):
+
+    def __init__(self,
+               data_folder=default_data_folder,
+               index_hash_folder='./data/',
+               mf=True):
+        self.mf = mf
+        self.dataset = 'cifar10'
+
+        """
+        For NAS encodings experiments, some of the path-based encodings currently require a
+        hash map from path indices to cell architectuers. We have created a pickle file which
+        contains the hash map, located at 
+        https://drive.google.com/file/d/1yMRFxT6u3ZyfiWUPhtQ_B9FbuGN3X-Nf/view?usp=sharing
+        """
+        self.index_hash = None
+        index_hash_path = os.path.expanduser(index_hash_folder + 'index_hash.pkl')
+        if os.path.isfile(index_hash_path):
+            self.index_hash = pickle.load(open(index_hash_path, 'rb'))
+
+        if not self.mf:
+            self.nasbench = nb101.NASBench(data_folder + 'nasbench_only108.tfrecord')
+        else:
+            self.nasbench = nb101.NASBench(data_folder + 'nasbench_full.tfrecord')
+        self.NUM_VERTICES = 7
+        self.OP_SPOTS = self.NUM_VERTICES - 2
+        self.MAX_EDGES = 9
+    
+    def get_arch_iter(self):
+        for unique_hash in self.nasbench.hash_iterator():
+            matrix = self.nasbench.fixed_statistics[unique_hash]['module_adjacency']
+            ops = self.nasbench.fixed_statistics[unique_hash]['module_operations']
+            arch = self.get_cell().convert_to_cell({"matrix":matrix,"ops":ops})
+            yield unique_hash,arch
+    
+    def __len__(self):
+        return 423624
+
+    @classmethod
+    def get_cell(cls, arch=None):
+        if not arch:
+            return Cell101
+        else:
+            return Cell101(**arch)
+
+    def get_type(self):
+        return 'nasbench_101'
+
+    def get_nbhd(self, arch, mutate_encoding='adj'):
+        return Cell101(**arch).get_neighborhood(self.nasbench, 
+                                                mutate_encoding=mutate_encoding,
+                                                index_hash=self.index_hash)
+
+    def get_hash2(self, arch):
+        # return a unique hash of the architecture+fidelity
+        return Cell101(**arch).get_path_indices()
+    
+    def get_hash(self,arch):
+        path_indices =  Cell101(**arch).encode_paths_seq_aware(length=120)
+        path_indices = ''.join(map(str, path_indices.tolist()))
+        return path_indices
+
+    def crossover(self,X1,X2,index_hash=None,crossover_rate=0.5):
+        ## 5、path index_hash crossover
+        # p=0
+        # while p<100:
+        #     p+=1
+        #     path_indices_1 = list(Cell101(X1['matrix'],X1["ops"]).get_path_indices())
+        #     n_path_1 = len(path_indices_1)
+        #     path_indices_2 = list(Cell101(X2["matrix"],X2["ops"]).get_path_indices())
+        #     n_path_2 = len(path_indices_2)
+        #     path_indices = path_indices_1+path_indices_2
+        #     random.shuffle(path_indices)
+        #     print("path_indices",path_indices)
+        #     new_path_indice_1 = tuple(np.unique(path_indices[:n_path_1]))
+        #     new_path_indice_2 = tuple(np.unique(path_indices[n_path_1:]))
+        #     if (new_path_indice_1 in index_hash) and (new_path_indice_2 in index_hash):
+        #         spec1 = index_hash[new_path_indice_1]
+        #         matrix1,ops1 = spec1['matrix'],spec1['ops']
+        #         model_spec1 = api.ModelSpec(matrix=matrix1, ops=ops1)
+
+        #         spec2 = index_hash[new_path_indice_2]
+        #         matrix2,ops2 = spec2['matrix'],spec2['ops']
+        #         model_spec2 = api.ModelSpec(matrix=matrix2, ops=ops2)
+
+        #         if self.nasbench.is_valid(model_spec1) and self.nasbench.is_valid(model_spec2):
+        #             return {
+        #                     'matrix': matrix1,
+        #                     'ops': ops1
+        #                     },{
+        #                     'matrix': matrix2,
+        #                     'ops': ops2 
+        #                     }
+        # print("crossover is not valid")
+        # return {
+        #         'matrix': copy.deepcopy(X1['matrix']),
+        #         'ops': copy.deepcopy(X1['ops'])
+        #         },{
+        #         'matrix': copy.deepcopy(X2['matrix']),
+        #         'ops': copy.deepcopy(X2['ops'])
+        #         }
+
+        # 4、path crossover
+        p = 0
+        matrix_A = copy.deepcopy(X1['matrix'])
+        ops_A = copy.deepcopy(X1['ops'])
+        matrix_B = copy.deepcopy(X2['matrix'])
+        ops_B = copy.deepcopy(X2['ops'])
+        paths = Cell101(matrix_A,ops_A).get_path_position()
+        n_path_A = len(paths)
+        # print("pathA:{}".format(paths))
+        paths2 = Cell101(matrix_B,ops_B).get_path_position()
+        # print("pathA:{}".format(paths2))
+        paths.extend(paths2)
+        n_path_B = len(paths)-n_path_A
+        while p<100:
+            p+=1
+            new_matrix_A = np.full(matrix_A.shape,0)
+            new_matrix_B = np.full(matrix_B.shape,0)
+            # selected_id_A =  random.sample(range(n_path_A+n_path_B),k=n_path_A)
+            # selected_id_B = random.sample(range(n_path_A+n_path_B),k=n_path_B)
+            selected_ids = list(range(n_path_A+n_path_B))
+            random.shuffle(selected_ids)
+            selected_id_A = selected_ids[:n_path_A]
+            selected_id_B = selected_ids[n_path_A:]
+            new_path_A  = [paths[id] for id in selected_id_A]
+            # print("new_path_A:{}".format(new_path_A))
+            new_path_B = [paths[id] for id in selected_id_B]
+            # print("new_path_B:{}".format(new_path_B))
+            for path in new_path_A:
+                for (x,y) in path:
+                    new_matrix_A[x,y] = 1
+            for path in new_path_B:
+                for (x,y) in path:
+                    new_matrix_B[x,y]=1
+            new_ops_A,new_ops_B = [],[]
+            #  得到o1的ops
+            count_visite_A = np.full((len(ops_A),),0)
+            count_visite_B = np.full((len(ops_B),),0)
+            for id in selected_id_A:
+                if id <n_path_A:
+                    #选中了P_A
+                    for x,y in paths[id]:
+                        count_visite_A[x]+=1
+                else:
+                    #选中了B
+                    for x,y in paths[id]:
+                        count_visite_B[x]+=1
+            zerios_id = np.logical_and(count_visite_A==0 , count_visite_B==0)
+            count_visite_A[zerios_id]=1
+            count_visite_B[zerios_id]=1
+            option_ops_A = np.random.uniform(0,1)< count_visite_A/(count_visite_A+count_visite_B)
+            for i in range(len(option_ops_A)):
+                if option_ops_A[i]:
+                    new_ops_A.append(ops_A[i])
+                else:
+                    new_ops_A.append(ops_B[i])
+            
+            #  得到o2的ops
+            count_visite_A = np.full((len(ops_A),),0)
+            count_visite_B = np.full((len(ops_B),),0)
+            for id in selected_id_B:
+                if id <n_path_A:
+                    #选中了P_A
+                    for x,y in paths[id]:
+                        count_visite_A[x]+=1
+                else:
+                    #选中了B
+                    for x,y in paths[id]:
+                        count_visite_B[x]+=1
+            zerios_id = np.logical_and(count_visite_A==0 , count_visite_B==0)
+            count_visite_A[zerios_id]=1
+            count_visite_B[zerios_id]=1
+            option_ops_A = np.random.uniform(0,1)< count_visite_A/(count_visite_A+count_visite_B)
+            for i in range(len(option_ops_A)):
+                if option_ops_A[i]:
+                    new_ops_B.append(ops_A[i])
+                else:
+                    new_ops_B.append(ops_B[i])
+            new_spec_A = nb101.ModelSpec(new_matrix_A, new_ops_A)
+            new_spec_B = nb101.ModelSpec(new_matrix_B, new_ops_B)
+            if self.nasbench.is_valid(new_spec_A) and self.nasbench.is_valid(new_spec_B):
+                    # logging.info("The crossover operation has already taken place")
+                return {
+                    'matrix': new_matrix_A,
+                    'ops': new_ops_A
+                },{
+                'matrix': new_matrix_B,
+                'ops': new_ops_B 
+                }
+        return {
+                'matrix': matrix_A,
+                'ops': ops_A
+                },{
+                'matrix': matrix_B,
+                'ops': ops_B 
+                }
+
+        # p=0
+        # matrix_A = copy.deepcopy(X1['matrix'])
+        # ops_A = copy.deepcopy(X1['ops'])
+        # matrix_B = copy.deepcopy(X2['matrix'])
+        # ops_B = copy.deepcopy(X2['ops'])
+        # while p<100:
+        #     p+=1
+        #     new_matrix_A = copy.deepcopy(matrix_A)
+        #     new_ops_A = copy.deepcopy(ops_A)
+        #     new_matrix_B = copy.deepcopy(matrix_B)
+        #     new_ops_B = copy.deepcopy(ops_B)
+            
+        #     # 3.
+        #     cross_points = np.random.uniform(0,1,size=len(ops_A))<crossover_rate
+        #     new_matrix_A[:,cross_points],new_matrix_B[:,cross_points]=\
+        #     new_matrix_B[:,cross_points].copy(),new_matrix_A[:,cross_points].copy()
+        #     for k in range(len(cross_points)):
+        #         if cross_points[k]:
+        #             new_ops_A[k],new_ops_B[k] = new_ops_B[k],new_ops_A[k]
+        #     # 2.
+        #     # o_c = np.random.uniform(0,1)
+        #     # m_c = np.random.uniform(0,1)
+        #     # if o_c<0.5:
+        #     #     cross_ops_points = np.random.uniform(0,1,size=len(ops_A))<crossover_rate
+        #     #     for k in range(len(cross_ops_points)):
+        #     #         if cross_ops_points[k]:
+        #     #             new_ops_A[k],new_ops_B[k] = new_ops_B[k],new_ops_A[k]
+        #     # if o_c>=0.5 or m_c<0.5:
+        #     #     cross_mat_points = np.random.uniform(0,1,size=len(ops_A))<crossover_rate
+        #     #     new_matrix_A[:,cross_mat_points],new_matrix_B[:,cross_mat_points]=\
+        #     #     new_matrix_B[:,cross_mat_points].copy(),new_matrix_A[:,cross_mat_points].copy()
+        #     # 1.
+        #     # cross_mat_points = np.random.uniform(0,1,size=matrix_A.shape)<crossover_rate
+        #     # cross_ops_points = np.random.uniform(0,1,size=len(ops_A))<crossover_rate
+        #     # new_matrix_A = np.select([cross_mat_points,~cross_mat_points],[matrix_A,matrix_B])
+        #     # new_matrix_B = np.select([~cross_mat_points,cross_mat_points],[matrix_A,matrix_B])
+        #     # new_ops_A,new_ops_B = [],[]
+        #     # for k in range(cross_ops_points.shape[0]):
+        #     #     if cross_ops_points[k]:
+        #     #         new_ops_A.append(ops_B[k])
+        #     #         new_ops_B.append(ops_A[k])
+        #     #     else:
+        #     #         new_ops_A.append(ops_A[k])
+        #     #         new_ops_B.append(ops_B[k])
+        #     new_spec_A = api.ModelSpec(new_matrix_A, new_ops_A)
+        #     new_spec_B = api.ModelSpec(new_matrix_B, new_ops_B)
+        #     if self.nasbench.is_valid(new_spec_A) and self.nasbench.is_valid(new_spec_B):
+        #         # logging.info("The crossover operation has already taken place")
+        #         return {
+        #             'matrix': new_matrix_A,
+        #             'ops': new_ops_A
+        #         },{
+        #         'matrix': new_matrix_B,
+        #         'ops': new_ops_B 
+        #         }
+        # return {
+        #         'matrix': matrix_A,
+        #         'ops': ops_A
+        #         },{
+        #         'matrix': matrix_B,
+        #         'ops': ops_B 
+        #         }
+    
+    def mutate(self,X1,mutation_rate=0.05):
+        matrix = copy.deepcopy(X1['matrix'])
+        ops = copy.deepcopy(X1['ops'])
+        p=0
+        while p<200:
+            p+=1
+            mutate_mat_points = np.random.uniform(0,1,size=matrix.shape)<mutation_rate
+            mutate_op_points = np.random.uniform(0,1,size=len(ops))<mutation_rate
+            new_matrix = np.select([mutate_mat_points,~mutate_mat_points],[matrix,1-matrix])
+            new_matrix = np.triu(new_matrix,k=1)
+            new_ops = copy.deepcopy(ops)
+            for point in range(len(mutate_op_points)):
+                if mutate_op_points[point]:
+                    available = [o for o in OPERATIONS_101 if o != ops[point]]
+                    new_ops[point] = np.random.choice(available)
+            new_spec = nb101.ModelSpec(new_matrix, new_ops)
+            if self.nasbench.is_valid(new_spec):
+                # logging.info("The mutation operation has already taken place")
+                return {
+                    'matrix': new_matrix,
+                    'ops': new_ops
+                    }
+        return {
+                'matrix': matrix,
+                'ops': ops
+                }
 
 
 class Nasbench201(Nasbench):

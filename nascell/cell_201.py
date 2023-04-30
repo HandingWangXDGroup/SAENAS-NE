@@ -16,7 +16,6 @@ from encoder.graph2vec import featrue_extract_by_graph
 
 INPUT = 'input'
 OUTPUT = 'output'
-OPS = list(OPS.keys())
 OPS_INCLUSIVE = [INPUT, OUTPUT, *OPS]
 NUM_OPS = len(OPS)
 OP_SPOTS = 6

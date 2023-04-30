@@ -16,7 +16,7 @@ import hashlib
 from nasspace import Nasbench301,Nasbench201,Nasbench101
 
 def load_graph_101():
-    searchspace = Nasbench101(data_folder="data/")
+    searchspace = Nasbench101(data_folder="/data/Fanliang/data/")
     INPUT = 'input'
     OUTPUT = 'output'
     CONV3X3 = 'conv3x3-bn-relu'

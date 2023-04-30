@@ -541,14 +541,14 @@ class Nasbench101(Nasbench):
         #         'ops': ops_B 
         #         }
     
-    def mutate(self,X1,mutation_rate=0.05):
+    def mutate(self,X1,p_m=0.05):
         matrix = copy.deepcopy(X1['matrix'])
         ops = copy.deepcopy(X1['ops'])
         p=0
         while p<200:
             p+=1
-            mutate_mat_points = np.random.uniform(0,1,size=matrix.shape)<mutation_rate
-            mutate_op_points = np.random.uniform(0,1,size=len(ops))<mutation_rate
+            mutate_mat_points = np.random.uniform(0,1,size=matrix.shape)<p_m
+            mutate_op_points = np.random.uniform(0,1,size=len(ops))<p_m
             new_matrix = np.select([mutate_mat_points,~mutate_mat_points],[matrix,1-matrix])
             new_matrix = np.triu(new_matrix,k=1)
             new_ops = copy.deepcopy(ops)

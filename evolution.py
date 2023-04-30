@@ -15,6 +15,7 @@ from nasspace import  Nasbench301,Nasbench201, Nasbench101
 import logging
 import random
 from operations import OPERATIONS_101,OPERATIONS_201, OPERATIONS_301
+from nascell_101.cell_101 import Cell101
 
 operations = OPERATIONS_101
 n_operations = len(operations)
@@ -29,16 +30,26 @@ def tournament_select(pop,n_sample=2):
     return pop[id]
 
 def crossover_ind(p1,p2,nasbench,p_c=0.5):
-    r  = random.uniform(0,1)
-    x1,x2 = nasbench.crossover(p1.X["arch"],p2.X["arch"],p_c)
-    ind1 = Individual(X={"arch":x1},age=0)
-    ind2 = Individual(X={"arch":x2},age=0)
+    if "arch" in p1.X:
+        x1,x2 = nasbench.crossover(p1.X["arch"],p2.X["arch"],p_c)
+        ind1 = Individual(X={"arch":x1},age=0)
+        ind2 = Individual(X={"arch":x2},age=0)
+    else:
+        x1,x2 = nasbench.crossover(p1.X,p2.X)
+        new_arch_A = Cell101.convert_to_cell(new_arch_A)
+        new_arch_B =Cell101.convert_to_cell(new_arch_B)
+        indA = Individual(X=new_arch_A,age=0)
+        indB  = Individual(X=new_arch_B,age=0)
+
     return ind1,ind2 
 
 def mutate_ind(p,nasbench,p_m=0.05):
-    r = random.uniform(0,1)
-    new_arch = nasbench.mutate(p.X["arch"],p_m)
-    ind = Individual(X={"arch":new_arch},age=0)
+    if "arch" in p.X:
+        new_arch = nasbench.mutate(p.X["arch"],p_m)
+        ind = Individual(X={"arch":new_arch},age=0)
+    else:
+        new_arch = nasbench.mutate(p.X,p_m)
+        ind = Individual(X=new_arch,age=0)
     return ind
 
 def cos_dis(a, b):

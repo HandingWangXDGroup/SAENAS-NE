@@ -59,10 +59,10 @@ def random_cell_adj(nasbench):
         ops[-1] = OUTPUT
         spec = api.ModelSpec(matrix=matrix, ops=ops)
         if nasbench.is_valid(spec):
-            return {"arch",{
+            return {
                 'matrix': matrix,
                 'ops': ops
-            }}
+            }
 
 
 def random_cell_cont_adj(nasbench):

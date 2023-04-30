@@ -1,3 +1,14 @@
+nasbench-101:
+  channels: 16
+  dataset: cifar10
+  nodes: 5
+  epochs: 60
+  batch_size: 512
+  nas_bench_dir: /data/Fanliang/data/
+  n_samples: 200
+  total_eval: 150
+  pop_size: 20
+
 nasbench-201:
   channels: 16
   dataset: cifar10
@@ -7,6 +18,7 @@ nasbench-201:
   n_samples: 200
   pop_size: 20
   nas_bench_dir: /data/Fanliang/data/
+  total_eval: 100
 
 nasbench-301:
     channels: 32

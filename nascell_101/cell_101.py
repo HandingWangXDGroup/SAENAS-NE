@@ -9,7 +9,7 @@ import pickle
 from numpy.matrixlib.defmatrix import matrix
 import torch
 from nasbench import api
-
+from encoder.graph2vec import featrue_extract_by_graph
 from .algo_sort import quick_sort_list
 from .distances import *
 from .sample_random import *
@@ -168,6 +168,23 @@ class Cell101:
         else:
             print('{} is an invalid predictor encoding'.format(predictor_encoding))
             raise NotImplementedError()
+    
+    def encode_g2v(self, nasspace,g2v_model):
+        edges = []
+        features = {}
+        matrix,ops = self.matrix, self.ops
+        hash_info = str(nasspace.get_hash({"matrix",matrix,"ops":ops}))
+        xs,ys = np.where(matrix==1)
+        xs = xs.tolist()
+        ys = ys.tolist()
+        for x,y in zip(xs,ys):
+            edges.append([x,y])
+        for id in range(len(ops)):
+            features[str(id)] = str(OPS_INCLUSIVE.index(ops[id]))
+        g = {"edges":edges,"features":features}
+        doc = featrue_extract_by_graph(g,name=hash_info)[0]
+        arch_code = g2v_model.infer_vector(doc)
+        return arch_code
     
     def gate_encoding(self,nasbench,encoder,deterministic):
         arch_dict = self.encode(predictor_encoding="gcn",nasbench=nasbench)

@@ -8,7 +8,7 @@ import numpy as np
 import random
 import torch
 import torch.backends.cudnn as cudnn
-from nasspace import Nasbench301, Nasbench201
+from nasspace import Nasbench301, Nasbench201, Nasbench101
 from gensim.models.doc2vec import Doc2Vec
 from utils import merge_params
 
@@ -70,8 +70,9 @@ for seed in range(1):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-
-    if args.nasbench == "201":
+    if args.nasbench == "101":
+        nasspace = Nasbench101(data_folder=args.nas_bench_dir)
+    elif args.nasbench == "201":
         nasspace = Nasbench201("cifar10",args.nas_bench_dir)
     elif args.nasbench == "301":
         nasspace = Nasbench301()

@@ -9,16 +9,16 @@ from ranknet import RankNet
 from utils import  build_train_sample
 from individual import Individual
 
-from nasspace import  Nasbench301,Nasbench201
+from nasspace import  Nasbench301,Nasbench201, Nasbench101
 
 import logging
 import random
-from operations import OPERATIONS_201, OPERATIONS_301
+from operations import OPERATIONS_101,OPERATIONS_201, OPERATIONS_301
 
-operations = list(OPERATIONS_301.keys())
+operations = OPERATIONS_101
 n_operations = len(operations)
 
-nasbenchs = {"201":Nasbench201,"301":Nasbench301}
+nasbenchs = {"101":Nasbench101,"201":Nasbench201,"301":Nasbench301}
 
 def tournament_select(pop,n_sample=2):
     pop_size  = len(pop)

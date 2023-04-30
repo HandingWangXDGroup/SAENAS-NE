@@ -1,5 +1,6 @@
 
 import copy
+from telnetlib import IP
 from nondo_sort import NonDominatedSorting
 
 import numpy as np

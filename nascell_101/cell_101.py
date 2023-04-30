@@ -32,10 +32,10 @@ MAX_EDGES = 9
 
 class Cell101:
 
-    def __init__(self, matrix, ops):
+    def __init__(self, arch):
 
-        self.matrix = matrix
-        self.ops = ops
+        self.matrix = arch['matrix']
+        self.ops = arch['ops']
         self.ops_t = ['conv3x3-bn-relu', 'conv1x1-bn-relu', 'maxpool3x3']
     def get_matrix(self):
         return self.matrix
@@ -173,7 +173,7 @@ class Cell101:
         edges = []
         features = {}
         matrix,ops = self.matrix, self.ops
-        hash_info = str(nasspace.get_hash({"matrix",matrix,"ops":ops}))
+        hash_info = str(nasspace.get_hash({"matrix":matrix,"ops":ops}))
         xs,ys = np.where(matrix==1)
         xs = xs.tolist()
         ys = ys.tolist()

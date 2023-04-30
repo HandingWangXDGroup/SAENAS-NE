@@ -4,8 +4,8 @@ import numpy as np
 import pickle
 import random
 
-from nascell.cell_301 import Cell301
-from nascell.cell_201 import Cell201
+from nascell_301.cell_301 import Cell301
+from nascell_201.cell_201 import Cell201
 from nascell_101.cell_101 import Cell101
 
 from nasbench import api as nb101

@@ -17,9 +17,6 @@ import random
 from operations import OPERATIONS_101,OPERATIONS_201, OPERATIONS_301
 from nascell_101.cell_101 import Cell101
 
-operations = OPERATIONS_101
-n_operations = len(operations)
-
 nasbenchs = {"101":Nasbench101,"201":Nasbench201,"301":Nasbench301}
 
 def tournament_select(pop,n_sample=2):
@@ -69,9 +66,7 @@ class ENAS(object):
         self.n_gen = 0
         self.n_eval = 0
         self.best_F = 0.
-        self.best_FS = []
-        self.test_F = 0.
-        self.test_FS = []
+        self.best_X = None
         self.pop = []
         self.archive = []
         self.hash_visited = {}
@@ -83,7 +78,6 @@ class ENAS(object):
         self.M = 6
         
         self.ranknet=None
-        self.gpr = None
 
         self.dataset = args.dataset
         self.Nasbench = nasbenchs[args.nasbench]
@@ -126,7 +120,7 @@ class ENAS(object):
         while self.has_next():
             self.next()
             logging.info("gen:{},FS:{}".format(self.n_gen,[ind.F for ind in self.archive])) 
-        return self.best_FS,self.diversitys
+        logging.info("The best genotype:{} \n The best Accuracy:{}".format(self.best_X,self.best_F))
     
     def pop_diversity(self,pop):
         cand_X = [ind.code for ind in pop]
@@ -245,7 +239,6 @@ class ENAS(object):
         logging.info("gen:{} n_update:{}".format(self.n_gen+1,n_update))
         logging.info("scores:{}".format(np.sort(-scores)[:self.pop_size]))
         
-        
         if (self.n_gen+1)%self.W==0:
             self.pop = sorted(self.pop,key=lambda x:x.score,reverse=True)
             scores_infill,uncerit_infill = self.predict(self.pop,return_std=True)
@@ -298,6 +291,7 @@ class ENAS(object):
             #--- 显示搜索到的最优个体 ---
             self.archive = sorted(self.archive,key=lambda x:x.F,reverse=True)
             self.best_F = self.archive[0].F
+            self.best_X = self.archive[0].X
             self.best_FS.extend([self.best_F]*k)
             logging.info("gen:{} n_eval:{} best_F:{}".format(self.n_gen,self.n_eval,self.best_F))
         

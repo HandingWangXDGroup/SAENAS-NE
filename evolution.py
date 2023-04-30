@@ -36,10 +36,10 @@ def crossover_ind(p1,p2,nasbench,p_c=0.5):
         ind2 = Individual(X={"arch":x2},age=0)
     else:
         x1,x2 = nasbench.crossover(p1.X,p2.X)
-        new_arch_A = Cell101.convert_to_cell(new_arch_A)
-        new_arch_B =Cell101.convert_to_cell(new_arch_B)
-        indA = Individual(X=new_arch_A,age=0)
-        indB  = Individual(X=new_arch_B,age=0)
+        new_arch_A = Cell101.convert_to_cell( x1)
+        new_arch_B =Cell101.convert_to_cell(x2)
+        ind1 = Individual(X=new_arch_A,age=0)
+        ind2  = Individual(X=new_arch_B,age=0)
 
     return ind1,ind2 
 
@@ -48,7 +48,7 @@ def mutate_ind(p,nasbench,p_m=0.05):
         new_arch = nasbench.mutate(p.X["arch"],p_m)
         ind = Individual(X={"arch":new_arch},age=0)
     else:
-        new_arch = nasbench.mutate(p.X,p_m)
+        new_arch = nasbench.mutate_arch(p.X)
         ind = Individual(X=new_arch,age=0)
     return ind
 
@@ -78,7 +78,6 @@ class ENAS(object):
         self.n_feature = 32
         self.code_type = "adj"
         self.g2v_model = g2v_model
-        self.n_cluster = 20
         self.K = 10
         self.W = 4
         self.M = 6
@@ -183,9 +182,10 @@ class ENAS(object):
             if patience==0:
                 break
             p1,p2 = tournament_select(self.pop,n_sample=2),tournament_select(self.pop,n_sample=2)
-            p1,p2 = crossover_ind(p1,p2,nasbench=self.nasspace)
-            p1 = mutate_ind(p1,nasbench=self.nasspace)
-            p2 = mutate_ind(p2,nasbench=self.nasspace)
+            if not isinstance( self.Nasbench, Nasbench101):
+                p1,p2 = crossover_ind(p1,p2,nasbench=self.nasspace,p_c=self.p_c)
+            p1 = mutate_ind(p1,nasbench=self.nasspace,p_m=self.p_m)
+            p2 = mutate_ind(p2,nasbench=self.nasspace,p_m=self.p_m)
             hash_p1 = self.nasspace.get_hash(p1.X)
             hash_p2 = self.nasspace.get_hash(p2.X)
             if (hash_p1 in hash_visited) and (hash_p2 in hash_visited):

@@ -8,6 +8,9 @@ nasbench-101:
   n_samples: 200
   total_eval: 150
   pop_size: 20
+  p_c: 0.5
+  p_m: 0.1
+
 
 nasbench-201:
   channels: 16

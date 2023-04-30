@@ -62,6 +62,7 @@ args = merge_params(args)
 print(args)
 # graph2vec
 g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim32.model")
+# g2v_model = Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model.model")
 
 for seed in range(1):
     logging.info("seed:{}".format(seed))

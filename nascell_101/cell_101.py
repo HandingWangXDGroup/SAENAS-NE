@@ -172,7 +172,7 @@ class Cell101:
         edges = []
         features = {}
         matrix,ops = self.matrix, self.ops
-        hash_info = str(nasspace.get_hash({"matrix",matrix,"ops":ops}))
+        hash_info = str(nasspace.get_hash({"matrix":matrix,"ops":ops}))
         xs,ys = np.where(matrix==1)
         xs = xs.tolist()
         ys = ys.tolist()
@@ -480,7 +480,7 @@ class Cell101:
             val_acc = []
             for i in range(3):
                 val_acc.append(nasbench.computed_statistics[key][108][i]['final_validation_accuracy'])
-            return 1-np.mean(val_acc)
+            return (1-np.mean(val_acc))*100
 
 
     def get_test_loss(self, nasbench, patience=50, epochs=108, dataset=None):

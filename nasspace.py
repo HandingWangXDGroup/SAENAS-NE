@@ -68,11 +68,12 @@ class Nasbench:
                     mutate_encoding='adj',
                     cutoff=0):
 
-        return self.get_cell(arch).mutate(self.nasbench,
-                                            mutation_rate=mutation_rate,
-                                            mutate_encoding=mutate_encoding,
-                                            index_hash=self.index_hash,
-                                            cutoff=cutoff)
+        # return self.get_cell(arch).mutate(self.nasbench,
+        #                                     mutation_rate=mutation_rate,
+        #                                     mutate_encoding=mutate_encoding,
+        #                                     index_hash=self.index_hash,
+        #                                     cutoff=cutoff)
+        return self.get_cell(arch).mutate2(self.nasbench,mutation_rate=mutation_rate)
 
     def generate_random_dataset(self,
                                 num=10, 

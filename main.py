@@ -12,12 +12,6 @@ from nasspace import Nasbench301, Nasbench201, Nasbench101
 from gensim.models.doc2vec import Doc2Vec
 from utils import merge_params
 
-logging.basicConfig(level=logging.INFO,
-                    filename='log.log',
-                    filemode='w',
-                    format=
-                    '%(asctime)s - %(levelname)s: %(message)s')
-
 cudnn.enabled = True
 cudnn.benchmark = True
 cudnn.deterministic = True
@@ -77,6 +71,10 @@ for seed in range(1):
         nasspace = Nasbench201("cifar10",args.nas_bench_dir)
     elif args.nasbench == "301":
         nasspace = Nasbench301()
-    
+    logging.basicConfig(level=logging.INFO,
+                    filename='logs/nasbench-'+args.nasbench+'.log',
+                    filemode='w',
+                    format=
+                    '%(asctime)s - %(levelname)s: %(message)s')
     enas = ENAS(nasspace=nasspace,g2v_model=g2v_model,args=args)
     best_FS = enas.solve()

@@ -10,6 +10,7 @@ nasbench-201:
 
 nasbench-301:
     channels: 32
+    dataset: cifar10
     nodes: 4
     epochs: 150
     batch_size: 256

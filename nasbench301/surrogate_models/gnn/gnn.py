@@ -11,7 +11,6 @@ from torch_geometric.data import DataLoader
 from tqdm import tqdm
 
 from nasbench301.surrogate_models import utils
-
 from nasbench301.surrogate_models.gnn.gnn_utils import NASBenchDataset, Patience
 from nasbench301.surrogate_models.gnn.models.deep_multisets import DeepMultisets
 from nasbench301.surrogate_models.gnn.models.deeper_gnn import DeeperGCN

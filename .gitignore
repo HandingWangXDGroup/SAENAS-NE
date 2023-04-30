@@ -6,3 +6,4 @@ nb_models/*
 acc_predictor/*
 data/*
 g2v_model/*
+whls/*

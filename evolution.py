@@ -15,7 +15,7 @@ import logging
 import random
 from operations import OPERATIONS_201, OPERATIONS_301
 
-operations = list(OPERATIONS_201.keys())
+operations = list(OPERATIONS_301.keys())
 n_operations = len(operations)
 
 nasbenchs = {"201":Nasbench201,"301":Nasbench301}

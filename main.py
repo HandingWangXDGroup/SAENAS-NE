@@ -17,7 +17,7 @@ cudnn.benchmark = True
 cudnn.deterministic = True
 
 parser = argparse.ArgumentParser("nasbench")
-parser.add_argument("--nasbench",choices=["101","201","301"],default="201")
+parser.add_argument("--nasbench",choices=["101","201","301"],default="201", help="nasbench_101,_201, or _301")
 parser.add_argument("--num_classes",type=int,default=10)
 parser.add_argument("--layers",type=int,default=2)
 parser.add_argument("--channels",type=int,default=32) #32
@@ -60,8 +60,8 @@ for seed in range(1):
     if args.nasbench == "101":
         nasspace = Nasbench101(data_folder=args.nas_bench_dir)
     elif args.nasbench == "201":
-        nasspace = Nasbench201("cifar10",args.nas_bench_dir)
+        nasspace = Nasbench201("cifar10",data_folder=args.nas_bench_dir)
     elif args.nasbench == "301":
-        nasspace = Nasbench301()
+        nasspace = Nasbench301(data_folder=args.nas_bench_dir)
     enas = ENAS(nasspace=nasspace,g2v_model=g2v_model,args=args)
     best_FS = enas.solve()

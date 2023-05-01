@@ -1,3 +1,3 @@
 #!/bin/bash
 
-CUDA_VISIBLE_DEVICES=1 python main.py --nasbench 101
+CUDA_VISIBLE_DEVICES=1 python main.py --nasbench 201

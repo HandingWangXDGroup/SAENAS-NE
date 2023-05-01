@@ -42,7 +42,7 @@ args = merge_params(args)
 
 print(args)
 # graph2vec
-g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim128.model")
+g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim32.model")
 
 logging.basicConfig(level=logging.INFO,
                     filename='logs/nasbench-'+args.nasbench+'-'+args.dataset+'.log',
@@ -64,4 +64,4 @@ for seed in range(1):
     elif args.nasbench == "301":
         nasspace = Nasbench301(data_folder=args.nas_bench_dir)
     enas = ENAS(nasspace=nasspace,g2v_model=g2v_model,args=args)
-    best_FS = enas.solve()
+    enas.solve()

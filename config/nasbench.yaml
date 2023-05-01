@@ -33,4 +33,4 @@ nasbench-301:
     epochs: 150
     batch_size: 256
     pop_size: 30
-    nas_bench_dir: 
+    nas_bench_dir: /data/Fanliang/data

@@ -70,7 +70,7 @@ class ENAS(object):
         self.pop = []
         self.archive = []
         self.hash_visited = {}
-        self.n_feature = 128
+        self.n_feature = 32
         self.code_type = "adj"
         self.g2v_model = g2v_model
         self.K = 10

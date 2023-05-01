@@ -8,8 +8,17 @@ CIFAR-10
 
 ## Experiments
 
+### Prepare the Nasbench space
+Nasbench-101: https://github.com/google-research/nasbench (nasbench_full.tfrecord)
 
-### Step 1. Prepare the architecture dataset on DARTS search space and train the graph2vec model
+Nasbench-201: https://github.com/D-X-Y/NAS-Bench-201 (NAS-Bench-201-v1_0-e61699.pth )
+
+Nasbench-301: https://github.com/automl/nasbench301 (v1.0)
+
+Download the datasets for different Nasbench spaces and change the location of nas_bench_dir in nasbench.yaml
+
+
+### Step 1. Prepare the architecture dataset on Nasbench space and train the graph2vec model
 ```shell
 bash scripts/data_json.sh
 ```

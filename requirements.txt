@@ -74,12 +74,11 @@ termcolor==2.3.0
 threadpoolctl==3.1.0
 tifffile==2021.11.2
 torch==1.13.1
-torch-cluster @ file:///data/Fanliang/senas_e/fl_copy/301-embedding-cluster3/whls/torch_cluster-1.6.1%2Bpt113cu117-cp37-cp37m-linux_x86_64.whl#sha256=9555ceec18a49f7dcd0f642fd109ee82503dc9503b29a9bb48f09ece836b267b
+torch-cluster 
 torch-geometric==2.3.1
 torch-scatter==2.1.1
-torch-sparse @ file:///data/Fanliang/senas_e/fl_copy/301-embedding-cluster3/whls/torch_sparse-0.6.17%2Bpt113cu117-cp37-cp37m-linux_x86_64.whl#sha256=49a159e2e1b80885f6b67d34b9efaa137845947ffbf90b54d0671fd52b9d4f5a
-torch-spline-conv @ https://data.pyg.org/whl/torch-1.13.0%2Bcu117/torch_spline_conv-1.2.2%2Bpt113cu117-cp37-cp37m-linux_x86_64.whl#sha256=12767ad4fd8cee9d15f29c5079beb37f413fcfd65129711f234d0fb1c1620549
-torchvision==0.14.1
+torch-sparse 
+torch-spline-conv
 tqdm==4.65.0
 traitlets==5.9.0
 typing_extensions==4.5.0

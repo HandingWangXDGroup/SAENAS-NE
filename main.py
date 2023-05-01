@@ -27,27 +27,14 @@ parser.add_argument("--momentum",type=float,default=0.9)
 parser.add_argument("--weight_decay",type=float,default=3e-4)
 parser.add_argument("--epochs",type=int,default=150)
 parser.add_argument("--root",type=str,default='/data/Fanliang/data')
-# parser.add_argument("--batch_size",type=int,default=64) # train
-parser.add_argument("--batch_size",type=int,default=256) # kd
+parser.add_argument("--batch_size",type=int,default=256) #
 parser.add_argument("--seed",type=int,default=0) # train
-# parser.add_argument("--seed",type=int,default=2020) # kd
-parser.add_argument("--ratio",type=float,default=0.8)
-parser.add_argument("--keep_prob",type=float,default=1.0)
-parser.add_argument("--drop_path_keep_prob",type=float,default=0.9)
-parser.add_argument('--use_aux_head', action='store_true', default=False)
 
-parser.add_argument("--n_kd_sample",type=int,default=20)
 
-parser.add_argument("--n_sample",type=int,default=3)
 parser.add_argument("--pop_size",type=int,default=30) #m
-parser.add_argument("--total_gen",type=int,default=80) #m
 parser.add_argument("--total_eval",type=int,default=300)
 parser.add_argument("--p_c",type=float,default=0.5)
 parser.add_argument("--p_m",type=float,default=0.05)
-parser.add_argument("--pool_limit",type=int,default=50)
-
-parser.add_argument("--up_epochs",type=int,default=5)
-parser.add_argument("--up_lr",type=float,default=0.001)
 
 args = parser.parse_args()
 
@@ -55,8 +42,7 @@ args = merge_params(args)
 
 print(args)
 # graph2vec
-g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim32.model")
-# g2v_model = Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model.model")
+g2v_model =  Doc2Vec.load("g2v_model/"+args.nasbench+"/doc2vec_model_dim128.model")
 
 logging.basicConfig(level=logging.INFO,
                     filename='logs/nasbench-'+args.nasbench+'-'+args.dataset+'.log',

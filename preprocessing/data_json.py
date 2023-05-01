@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--dimensions",
                         type=int,
-                        default=32,
+                        default=128,
                         help="Number of dimensions. Default is 128.")
 
     parser.add_argument("--workers",
@@ -159,7 +159,7 @@ if __name__ == "__main__":
                         help="Down sampling rate of features. Default is 0.0001.")
     args = parser.parse_args()
     if args.nasbench=='101':
-        load_graph_101()
+        # load_graph_101()
         args.input_path = "data/graphs_json_101"
     elif args.nasbench=="201":
         load_graph_201()

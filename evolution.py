@@ -45,7 +45,7 @@ def mutate_ind(p,nasbench,p_m=0.05):
         new_arch = nasbench.mutate(p.X["arch"],p_m)
         ind = Individual(X={"arch":new_arch},age=0)
     else:
-        new_arch = nasbench.mutate_arch(p.X)
+        new_arch = nasbench.mutate(p.X,p_m)
         ind = Individual(X=new_arch,age=0)
     return ind
 
@@ -55,7 +55,6 @@ def cos_dis(a, b):
 class ENAS(object):
     def __init__(self,nasspace,g2v_model,args):
         self.pop_size = args.pop_size
-        self.total_gen = args.total_gen
         self.total_eval = args.total_eval
         self.nasspace = nasspace
         self.args = args
@@ -71,7 +70,7 @@ class ENAS(object):
         self.pop = []
         self.archive = []
         self.hash_visited = {}
-        self.n_feature = 32
+        self.n_feature = 128
         self.code_type = "adj"
         self.g2v_model = g2v_model
         self.K = 10
@@ -177,8 +176,8 @@ class ENAS(object):
             if patience==0:
                 break
             p1,p2 = tournament_select(self.pop,n_sample=2),tournament_select(self.pop,n_sample=2)
-            if not isinstance( self.Nasbench, Nasbench101):
-                p1,p2 = crossover_ind(p1,p2,nasbench=self.nasspace,p_c=self.p_c)
+            #if not isinstance( self.Nasbench, Nasbench101):
+            p1,p2 = crossover_ind(p1,p2,nasbench=self.nasspace,p_c=self.p_c)
             p1 = mutate_ind(p1,nasbench=self.nasspace,p_m=self.p_m)
             p2 = mutate_ind(p2,nasbench=self.nasspace,p_m=self.p_m)
             hash_p1 = self.nasspace.get_hash(p1.X)
